@@ -1,13 +1,15 @@
 package datastructures
 
-import "strings"
+import (
+	"strings"
+)
 
 var (
 	obsFields []string
 )
 
 func init() {
-	obsFields = fields(&Attributions{})
+	obsFields = fields(&Observation{})
 }
 
 // Observation holds the set of all potentially useful fields at a given point in time.
@@ -19,32 +21,41 @@ type Observation struct {
 	StationID string
 	Date      string // Date UTC in YYYYMMDD format.
 	Time      string // Time UTC in 24 HR HHMM format.
-	TempC     float64
+
+	TempC float64
+	// TODO(rsned): Add additional value types.
 }
 
 // EmptyObservation returns a pre-set empty value with the missing sentinel
 // values set on all relevant fields.
 func EmptyObservation() *Observation {
-	return &Observation{}
+	return &Observation{
+		TempC: UnsetValue,
+	}
 }
 
-func (a *Observation) String() string {
-	return a.CSV(",")
+func (o *Observation) String() string {
+	return o.CSV(",")
 }
 
 // CSV returns this elements values as a CSV string.
-func (a *Observation) CSV(delim string) string {
-	return strings.Join(a.ValueColumns(), delim)
+func (o *Observation) CSV(delim string) string {
+	return strings.Join(o.ValueColumns(), delim)
 }
 
 // HeaderColumns returns the labels for the columns in this entity.
-func (a *Observation) HeaderColumns(prefix string) []string {
+func (o *Observation) HeaderColumns(prefix string) []string {
 	// TODO(rsned): Cache the list by prefix to save on redundant work.
 	return prefixLabels(prefix, obsFields)
 }
 
 // ValueColumns returns the values for this entity as a collection of strings
 // in the same order as the HeaderColumns.
-func (a *Observation) ValueColumns() []string {
-	return []string{}
+func (o *Observation) ValueColumns() []string {
+	return []string{
+		o.StationID,
+		o.Date,
+		o.Time,
+		floatOrUnsetString(o.TempC),
+	}
 }
