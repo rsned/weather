@@ -62,10 +62,11 @@ func (s *Station) CSV(delim string) string {
 
 func (s *Station) HeaderColumns(prefix string) []string {
 	// TODO(rsned): Cache the list by prefix to save on redundant work.
-	cols := prefixLabels(prefix, stationFields)
+	cols := prefixLabels(prefix, stationFields)[0:2]
 	cols = append(cols, s.Identifiers.HeaderColumns("ids")...)
 	cols = append(cols, s.Geography.HeaderColumns("geo")...)
 	cols = append(cols, s.Attributions.HeaderColumns("attr")...)
+	cols = append(cols, prefixLabels(prefix, stationFields)[2:]...)
 
 	return cols
 }
@@ -74,13 +75,14 @@ func (s *Station) ValueColumns() []string {
 	cols := []string{
 		s.ID,
 		s.Name,
-		s.StartDate,
-		s.EndDate,
-		s.LastUpdated,
 	}
 	cols = append(cols, s.Identifiers.ValueColumns()...)
 	cols = append(cols, s.Geography.ValueColumns()...)
 	cols = append(cols, s.Attributions.ValueColumns()...)
-
+	cols = append(cols, []string{
+		s.StartDate,
+		s.EndDate,
+		s.LastUpdated,
+	}...)
 	return cols
 }
